@@ -85,7 +85,9 @@ class InlineFragmentRendererTest extends TestCase
     {
         Request::setTrustedHeaderName(Request::HEADER_CLIENT_IP, '');
 
-        $strategy = new InlineFragmentRenderer($this->getKernelExpectingRequest(Request::create('/', 'GET', array(), array(), array(), array('REMOTE_ADDR' => '1.1.1.1'))));
+        $request = Request::create('/');
+        $request->server->set('REMOTE_ADDR', '1.1.1.1');
+        $strategy = new InlineFragmentRenderer($this->getKernelExpectingRequest($request));
         $this->assertSame('foo', $strategy->render('/', Request::create('/'))->getContent());
     }
 
@@ -195,14 +197,17 @@ class InlineFragmentRendererTest extends TestCase
 
     public function testHeadersPossiblyResultingIn304AreNotAssignedToSubrequest()
     {
-        $expectedSubRequest = Request::create('/', 'GET', array(), array(), array(), array('REMOTE_ADDR' => '1.1.1.1'));
+        $expectedSubRequest = Request::create('/');
+        $expectedSubRequest->server->set('REMOTE_ADDR', '1.1.1.1');
         if (Request::getTrustedHeaderName(Request::HEADER_CLIENT_IP)) {
             $expectedSubRequest->headers->set('x-forwarded-for', array('127.0.0.1'));
             $expectedSubRequest->server->set('HTTP_X_FORWARDED_FOR', '127.0.0.1');
         }
 
         $strategy = new InlineFragmentRenderer($this->getKernelExpectingRequest($expectedSubRequest));
-        $request = Request::create('/', 'GET', array(), array(), array(), array('HTTP_IF_MODIFIED_SINCE' => 'Fri, 01 Jan 2016 00:00:00 GMT', 'HTTP_IF_NONE_MATCH' => '*'));
+        $request = Request::create('/');
+        $expectedSubRequest->server->set('HTTP_IF_MODIFIED_SINCE', 'Fri, 01 Jan 2016 00:00:00 GMT');
+        $expectedSubRequest->server->set('HTTP_IF_NONE_MATCH', '*');
         $strategy->render('/', $request);
     }
 
