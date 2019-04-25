@@ -81,7 +81,7 @@ class PhpExtractor extends AbstractFileExtractor implements ExtractorInterface
     {
         $files = $this->extractFiles($resource);
         foreach ($files as $file) {
-            $this->parseTokens(token_get_all(file_get_contents($file)), $catalog);
+            $this->parseTokens(token_get_all(file_get_contents($file)), $file, $catalog);
 
             gc_mem_caches();
         }
@@ -196,9 +196,10 @@ class PhpExtractor extends AbstractFileExtractor implements ExtractorInterface
      * Extracts trans message from PHP tokens.
      *
      * @param array            $tokens
+     * @param string           $filename
      * @param MessageCatalogue $catalog
      */
-    protected function parseTokens($tokens, MessageCatalogue $catalog)
+    protected function parseTokens($tokens, $filename, MessageCatalogue $catalog)
     {
         $tokenIterator = new \ArrayIterator($tokens);
 
@@ -236,6 +237,9 @@ class PhpExtractor extends AbstractFileExtractor implements ExtractorInterface
 
                 if ($message) {
                     $catalog->set($message, $this->prefix.$message, $domain);
+                    $metadata = $catalog->getMetadata($message, $domain) ?? [];
+                    $metadata['sources'][] = $filename.':'.$tokens[$key][2];
+                    $catalog->setMetadata($message, $metadata, $domain);
                     break;
                 }
             }
