@@ -77,7 +77,7 @@ EOF;
 
     public function resourcesProvider()
     {
-        $directory = implode(\DIRECTORY_SEPARATOR, [__DIR__, '..', 'fixtures', 'extractor', '']);
+        $directory = implode(\DIRECTORY_SEPARATOR, [__DIR__, '..', 'fixtures', 'extractor']);
         $splFiles = [];
         foreach (new \DirectoryIterator($directory) as $fileInfo) {
             if ($fileInfo->isDot()) {
@@ -92,9 +92,9 @@ EOF;
         return [
             [$directory],
             [$phpFile],
-            [glob($directory.'*')],
+            [glob($directory.\DIRECTORY_SEPARATOR.'*')],
             [$splFiles],
-            [new \ArrayObject(glob($directory.'*'))],
+            [new \ArrayObject(glob($directory.\DIRECTORY_SEPARATOR.'*'))],
             [new \ArrayObject($splFiles)],
         ];
     }
