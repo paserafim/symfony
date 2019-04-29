@@ -70,14 +70,14 @@ EOF;
 
         $this->assertEquals($expectedCatalogue, $actualCatalogue);
 
-        $filename = implode(\DIRECTORY_SEPARATOR, [__DIR__, '..', 'fixtures', 'extractor', 'translation.html.php']);
+        $filename = __DIR__.'/../fixtures/extractor/translation.html.php';
         $this->assertEquals(['sources' => [$filename.':2']], $catalogue->getMetadata('single-quoted key'));
         $this->assertEquals(['sources' => [$filename.':43']], $catalogue->getMetadata('other-domain-test-no-params-short-array', 'not_messages'));
     }
 
     public function resourcesProvider()
     {
-        $directory = implode(\DIRECTORY_SEPARATOR, [__DIR__, '..', 'fixtures', 'extractor']);
+        $directory = __DIR__.'/../fixtures/extractor';
         $splFiles = [];
         foreach (new \DirectoryIterator($directory) as $fileInfo) {
             if ($fileInfo->isDot()) {
@@ -92,9 +92,9 @@ EOF;
         return [
             [$directory],
             [$phpFile],
-            [glob($directory.\DIRECTORY_SEPARATOR.'*')],
+            [glob($directory.'/*')],
             [$splFiles],
-            [new \ArrayObject(glob($directory.\DIRECTORY_SEPARATOR.'*'))],
+            [new \ArrayObject(glob($directory.'/*'))],
             [new \ArrayObject($splFiles)],
         ];
     }
