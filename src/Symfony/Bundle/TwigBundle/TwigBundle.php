@@ -32,7 +32,7 @@ class TwigBundle extends Bundle
     {
         parent::build($container);
 
-        $container->addCompilerPass(new ExtensionPass());
+        $container->addCompilerPass(new ExtensionPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 32);
         $container->addCompilerPass(new TwigEnvironmentPass());
         $container->addCompilerPass(new TwigLoaderPass());
         $container->addCompilerPass(new ExceptionListenerPass());
