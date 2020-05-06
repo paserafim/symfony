@@ -1492,6 +1492,7 @@ class Configuration implements ConfigurationInterface
                         ->thenInvalid('"dsn" and "transports" cannot be used together.')
                     ->end()
                     ->fixXmlConfig('transport')
+                    ->fixXmlConfig('header')
                     ->children()
                         ->scalarNode('message_bus')->defaultNull()->info('The message bus to use. Defaults to the default bus if the Messenger component is installed.')->end()
                         ->scalarNode('dsn')->defaultNull()->end()
@@ -1512,6 +1513,26 @@ class Configuration implements ConfigurationInterface
                                         })
                                     ->end()
                                     ->prototype('scalar')->end()
+                                ->end()
+                            ->end()
+                        ->end()
+                        ->arrayNode('headers')
+                            ->normalizeKeys(false)
+                            ->useAttributeAsKey('key')
+                            ->prototype('array')
+                                ->normalizeKeys(false)
+                                ->beforeNormalization()
+                                    ->ifTrue(function ($v) {
+                                        if (\is_array($v)) {
+                                            return array_keys($v) !== ['value'];
+                                        }
+
+                                        return true;
+                                    })
+                                    ->then(function ($v) { return ['value' => $v]; })
+                                ->end()
+                                ->children()
+                                    ->variableNode('value')->end()
                                 ->end()
                             ->end()
                         ->end()

@@ -13,6 +13,9 @@
                 <framework:recipients>redirected@example.org</framework:recipients>
                 <framework:recipients>redirected1@example.org</framework:recipients>
             </framework:envelope>
+            <framework:header key="from">from@example.org</framework:header>
+            <framework:header key="bcc">bcc1@example.org</framework:header>
+            <framework:header key="foo">bar</framework:header>
         </framework:mailer>
     </framework:config>
 </container>

@@ -25,6 +25,19 @@ final class Headers
         'date', 'from', 'sender', 'reply-to', 'to', 'cc', 'bcc',
         'message-id', 'in-reply-to', 'references', 'subject',
     ];
+    private static $headerClassMap = [
+        'date' => DateHeader::class,
+        'from' => MailboxListHeader::class,
+        'sender' => MailboxHeader::class,
+        'reply-to' => MailboxListHeader::class,
+        'to' => MailboxListHeader::class,
+        'cc' => MailboxListHeader::class,
+        'bcc' => MailboxListHeader::class,
+        'message-id' => IdentificationHeader::class,
+        'in-reply-to' => IdentificationHeader::class,
+        'references' => IdentificationHeader::class,
+        'return-path' => PathHeader::class,
+    ];
 
     private $headers = [];
     private $lineLength = 76;
@@ -122,6 +135,22 @@ final class Headers
         return $this->add(new ParameterizedHeader($name, $value, $params));
     }
 
+    /**
+     * @return $this
+     */
+    public function addHeader(string $name, $argument, array $more = []): self
+    {
+        $parts = explode('\\', self::$headerClassMap[$name] ?? UnstructuredHeader::class);
+        $method = 'add'.ucfirst(array_pop($parts));
+        if ('addUnstructuredHeader' === $method) {
+            $method = 'addTextHeader';
+        } elseif ('addIdentificationHeader' === $method) {
+            $method = 'addIdHeader';
+        }
+
+        return $this->$method($name, $argument, $more);
+    }
+
     public function has(string $name): bool
     {
         return isset($this->headers[strtolower($name)]);
@@ -132,26 +161,10 @@ final class Headers
      */
     public function add(HeaderInterface $header): self
     {
-        static $map = [
-            'date' => DateHeader::class,
-            'from' => MailboxListHeader::class,
-            'sender' => MailboxHeader::class,
-            'reply-to' => MailboxListHeader::class,
-            'to' => MailboxListHeader::class,
-            'cc' => MailboxListHeader::class,
-            'bcc' => MailboxListHeader::class,
-            'message-id' => IdentificationHeader::class,
-            'in-reply-to' => IdentificationHeader::class,
-            'references' => IdentificationHeader::class,
-            'return-path' => PathHeader::class,
-        ];
+        self::checkHeaderClass($header);
 
         $header->setMaxLineLength($this->lineLength);
         $name = strtolower($header->getName());
-
-        if (isset($map[$name]) && !$header instanceof $map[$name]) {
-            throw new LogicException(sprintf('The "%s" header must be an instance of "%s" (got "%s").', $header->getName(), $map[$name], get_debug_type($header)));
-        }
 
         if (\in_array($name, self::$uniqueHeaders, true) && isset($this->headers[$name]) && \count($this->headers[$name]) > 0) {
             throw new LogicException(sprintf('Impossible to set header "%s" as it\'s already defined and must be unique.', $header->getName()));
@@ -202,6 +215,18 @@ final class Headers
     public static function isUniqueHeader(string $name): bool
     {
         return \in_array($name, self::$uniqueHeaders, true);
+    }
+
+    /**
+     * @throws LogicException if the header name and class are not compatible
+     */
+    public static function checkHeaderClass(HeaderInterface $header): void
+    {
+        $name = strtolower($header->getName());
+
+        if (isset(self::$headerClassMap[$name]) && !$header instanceof self::$headerClassMap[$name]) {
+            throw new LogicException(sprintf('The "%s" header must be an instance of "%s" (got "%s").', $header->getName(), self::$headerClassMap[$name], get_debug_type($header)));
+        }
     }
 
     public function toString(): string
