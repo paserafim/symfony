@@ -92,6 +92,14 @@ function ref(string $id): ReferenceConfigurator
 }
 
 /**
+ * Creates a parameter.
+ */
+function param(string $name): string
+{
+    return '%'.$name.'%';
+}
+
+/**
  * Creates an inline service.
  *
  * @deprecated since Symfony 5.1, use service() instead.
