@@ -20,6 +20,7 @@ use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
+use Symfony\Component\DependencyInjection\Parameter;
 use Symfony\Component\ExpressionLanguage\Expression;
 
 /**
@@ -89,6 +90,14 @@ class ContainerConfigurator extends AbstractConfigurator
 function ref(string $id): ReferenceConfigurator
 {
     return new ReferenceConfigurator($id);
+}
+
+/**
+ * Creates a parameter.
+ */
+function param(string $id): string
+{
+    return '%'.$id.'%';
 }
 
 /**
